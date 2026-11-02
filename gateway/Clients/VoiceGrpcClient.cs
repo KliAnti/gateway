@@ -25,7 +25,7 @@ namespace gateway.Clients
         /// </summary>
         /// <param name="message">Текст, который нужно отправить в voice.</param>
         /// <param name="cancellationToken">Токен отмены запроса.</param>
-        /// <returns>Ответ voice в собсвтенном формате gateway.</returns>
+        /// <returns>Ответ voice в собственном формате gateway.</returns>
         public async Task<string> PingAsync(string message, CancellationToken cancellationToken)
         {
             var grpcResponse = await _grpcClient.PingAsync(

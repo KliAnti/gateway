@@ -6,9 +6,12 @@ using Serilog.Enrichers.Span;
 using IdentityClient = identity.Grpc.Identity.IdentityClient;
 using VoiceClient = voice.Grpc.Voice.VoiceClient;
 
-AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
 var builder = WebApplication.CreateBuilder(args);
+
+var http2SupportSwitch = builder.Configuration["Http2UnencryptedSupportSwitch"];
+
+if(!string.IsNullOrWhiteSpace(http2SupportSwitch))
+    AppContext.SetSwitch(http2SupportSwitch, true);
 
 builder.Host.UseSerilog((_, loggerConfiguration) =>
     loggerConfiguration

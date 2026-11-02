@@ -1,12 +1,12 @@
 ﻿namespace gateway.Features.Voice.Ping
 {
     /// <summary>
-    /// Собирает все HTTP-эндпоинты, которые обращаются к сервису voice.
+    /// Маппит эндпоинт для проверки эхо сервиса voice.
     /// </summary>
     public static class PingVoiceEndpoint
     {
         /// <summary>
-        /// Регистрирует эндпоинты voice в приложении - чтобы их можно было вызвать по HTTP.
+        /// Регистрирует GET эндпоинт /api/voice/ping.
         /// </summary>
         /// <param name="app">Объект, через который приложение добавляет себе маршруты.</param>
         public static void MapVoiceEndpoint(this IEndpointRouteBuilder app)

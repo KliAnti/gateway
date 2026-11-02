@@ -1,12 +1,12 @@
 ﻿namespace gateway.Features.Identity.Ping
 {
     /// <summary>
-    /// Собирает все HTTP-эндпоинты, которые обращаются к сервису identity.
+    /// Маппит эндпоинт для проверки эхо сервиса identity.
     /// </summary>
     public static class PingIdentityEndpoint
     {
         /// <summary>
-        /// Регистрирует эндпоинты identity в приложении - чтобы их можно было вызвать по HTTP.
+        /// Регистрирует GET эндпоинт /api/identity/ping.
         /// </summary>
         /// <param name="app">Объект, через который приложение добавляет себе маршруты.</param>
         public static void MapIdentityEndpoint(this IEndpointRouteBuilder app)
