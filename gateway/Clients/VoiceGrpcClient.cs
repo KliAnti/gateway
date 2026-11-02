@@ -1,13 +1,13 @@
-﻿using gateway.Contracts.Voice;
+﻿using gateway.Features.Voice.Ping;
 using VoiceClient = voice.Grpc.Voice.VoiceClient;
 using VoicePingRequest = voice.Grpc.PingRequest;
 
-namespace gateway.Integrations
+namespace gateway.Clients
 {
     /// <summary>
     /// Ходит в сервис voice по gRPC и переводит его ответы в формат, понятный внешнему миру.
     /// </summary>
-    public sealed class VoiceIntegration
+    public sealed class VoiceGrpcClient
     {
         private readonly VoiceClient _grpcClient;
 
@@ -15,7 +15,7 @@ namespace gateway.Integrations
         /// Принимает уже готового gRPC-клиента voice — его собирает и передаёт DI-контейнер.
         /// </summary>
         /// <param name="grpcClient">gRPC-клиент, через который идут вызовы к сервису voice.</param>
-        public VoiceIntegration(VoiceClient grpcClient)
+        public VoiceGrpcClient(VoiceClient grpcClient)
         {
             _grpcClient = grpcClient;
         }
@@ -26,7 +26,7 @@ namespace gateway.Integrations
         /// <param name="message">Текст, который нужно отправить в voice.</param>
         /// <param name="cancellationToken">Токен отмены запроса.</param>
         /// <returns>Ответ voice в собсвтенном формате gateway.</returns>
-        public async Task<PingResponse> PingAsync(string message, CancellationToken cancellationToken)
+        public async Task<string> PingAsync(string message, CancellationToken cancellationToken)
         {
             var grpcResponse = await _grpcClient.PingAsync(
                 new VoicePingRequest
@@ -35,7 +35,7 @@ namespace gateway.Integrations
                 },
                 cancellationToken: cancellationToken);
 
-            return new PingResponse(grpcResponse.Message);
+            return grpcResponse.Message;
         }
     }
 }

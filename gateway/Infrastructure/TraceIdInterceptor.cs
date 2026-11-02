@@ -3,7 +3,7 @@ using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Serilog.Context;
 
-namespace gateway.Services
+namespace gateway.Infrastructure
 {
     public sealed class TraceIdInterceptor : Interceptor
     {

@@ -4,7 +4,7 @@ using Moq;
 using System.Net;
 using VoicePingRequest = voice.Grpc.PingRequest;
 using VoicePongResponse = voice.Grpc.PongResponse;
-using PingResponse = gateway.Contracts.Voice.PingResponse;
+using PingVoiceResponse = gateway.Features.Voice.Ping.PingVoiceResponse;
 
 namespace gateway.Tests.Tests
 {
@@ -40,7 +40,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _client.PingVoice();
-            var body = await _client.ReadAsAsync<PingResponse>(response);
+            var body = await _client.ReadAsAsync<PingVoiceResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -60,7 +60,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _client.PingVoice("hello");
-            var body = await _client.ReadAsAsync<PingResponse>(response);
+            var body = await _client.ReadAsAsync<PingVoiceResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");

@@ -4,7 +4,7 @@ using Moq;
 using System.Net;
 using IdentityPingRequest = identity.Grpc.PingRequest;
 using IdentityPongResponse = identity.Grpc.PongResponse;
-using PingResponse = gateway.Contracts.Identity.PingResponse;
+using PingIdentityResponse = gateway.Features.Identity.Ping.PingIdentityResponse;
 
 namespace gateway.Tests.Tests
 {
@@ -40,7 +40,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _client.PingIdentity();
-            var body = await _client.ReadAsAsync<PingResponse>(response);
+            var body = await _client.ReadAsAsync<PingIdentityResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -60,7 +60,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _client.PingIdentity("hello");
-            var body = await _client.ReadAsAsync<PingResponse>(response);
+            var body = await _client.ReadAsAsync<PingIdentityResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");

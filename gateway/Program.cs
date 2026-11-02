@@ -1,5 +1,6 @@
-using gateway.Endpoints;
-using gateway.Integrations;
+using gateway.Clients;
+using gateway.Features.Identity.Ping;
+using gateway.Features.Voice.Ping;
 using Serilog;
 using Serilog.Enrichers.Span;
 using IdentityClient = identity.Grpc.Identity.IdentityClient;
@@ -18,19 +19,22 @@ builder.Host.UseSerilog((_, loggerConfiguration) =>
 builder.Services.AddGrpcClient<IdentityClient>(options =>
 {
     var address = builder.Configuration["Grpc:IdentityAddress"]
-        ?? throw new InvalidOperationException("Configuration value 'Grpc:IdentityAddress' is required.");
+        ?? throw new InvalidOperationException("Missing required configuration: 'Grpc:IdentityAddress'.");
     options.Address = new Uri(address);
 });
 
 builder.Services.AddGrpcClient<VoiceClient>(options =>
 {
     var address = builder.Configuration["Grpc:VoiceAddress"]
-        ?? throw new InvalidOperationException("Configuration value 'Grpc:VoiceAddress' is required.");
+        ?? throw new InvalidOperationException("Missing required configuration: 'Grpc:VoiceAddress'.");
     options.Address = new Uri(address);
 });
 
-builder.Services.AddScoped<IdentityIntegration>();
-builder.Services.AddScoped<VoiceIntegration>();
+builder.Services.AddScoped<IdentityGrpcClient>();
+builder.Services.AddScoped<VoiceGrpcClient>();
+
+builder.Services.AddScoped<PingIdentityHandler>();
+builder.Services.AddScoped<PingVoiceHandler>();
 
 builder.Services.AddHealthChecks();
 
@@ -40,7 +44,7 @@ app.UseSerilogRequestLogging();
 
 app.MapHealthChecks("/health");
 
-app.MapIdentityEndpoints();
-app.MapVoiceEndpoints();
+app.MapIdentityEndpoint();
+app.MapVoiceEndpoint();
 
 app.Run();
