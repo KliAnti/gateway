@@ -33,8 +33,8 @@ jobs:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget add source "https://nuget.pkg.github.com/KliAnti/index.json" \
-            --name github \
+          dotnet nuget update source github \
+            --source "https://nuget.pkg.github.com/KliAnti/index.json" \
             --username "$USERNAME" \
             --password "$TOKEN" \
             --store-password-in-clear-text
