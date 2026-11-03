@@ -1,8 +1,10 @@
 using gateway.Clients;
 using gateway.Features.Identity.Ping;
 using gateway.Features.Voice.Ping;
+using gateway.Infrastructure.Endpoints;
 using Serilog;
 using Serilog.Enrichers.Span;
+using System.Reflection;
 using IdentityClient = identity.Grpc.Identity.IdentityClient;
 using VoiceClient = voice.Grpc.Voice.VoiceClient;
 
@@ -36,8 +38,7 @@ builder.Services.AddGrpcClient<VoiceClient>(options =>
 builder.Services.AddScoped<IdentityGrpcClient>();
 builder.Services.AddScoped<VoiceGrpcClient>();
 
-builder.Services.AddScoped<PingIdentityHandler>();
-builder.Services.AddScoped<PingVoiceHandler>();
+builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 builder.Services.AddHealthChecks();
 
@@ -47,7 +48,6 @@ app.UseSerilogRequestLogging();
 
 app.MapHealthChecks("/health");
 
-app.MapIdentityEndpoint();
-app.MapVoiceEndpoint();
+app.MapEndpoints();
 
 app.Run();

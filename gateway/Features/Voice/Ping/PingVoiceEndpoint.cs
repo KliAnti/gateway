@@ -1,15 +1,26 @@
-﻿namespace gateway.Features.Voice.Ping
+﻿using gateway.Infrastructure.Endpoints;
+
+namespace gateway.Features.Voice.Ping
 {
     /// <summary>
-    /// Маппит эндпоинт для проверки эхо сервиса voice.
+    /// Эндпоинт для проверки эхо сервиса voice.
     /// </summary>
-    public static class PingVoiceEndpoint
+    public sealed class PingVoiceEndpoint : IEndpoint
     {
+        /// <summary>
+        /// Регистрирует PingVoiceHandler в DI.
+        /// </summary>
+        /// <param name="services">Коллекция сервисов DI контейнера.</param>
+        public void AddServices(IServiceCollection services)
+        {
+            services.AddScoped<PingVoiceHandler>();
+        }
+
         /// <summary>
         /// Регистрирует GET эндпоинт /api/voice/ping.
         /// </summary>
         /// <param name="app">Объект, через который приложение добавляет себе маршруты.</param>
-        public static void MapVoiceEndpoint(this IEndpointRouteBuilder app)
+        public void Map(IEndpointRouteBuilder app)
         {
             var group = app.MapGroup("/api/voice");
 
