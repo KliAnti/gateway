@@ -44,6 +44,14 @@ namespace gateway.Tests
             IdentityClient.Reset();
             VoiceClient.Reset();
         }
+
+        /// <summary>
+        /// Собирает ApiClient поверх HttpClient этой фикстуры.
+        /// </summary>
+        public ApiClient CreateApiClient()
+        {
+            return new ApiClient(CreateClient());
+        }
     }
 
     /// <summary>

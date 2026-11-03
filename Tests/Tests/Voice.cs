@@ -5,6 +5,8 @@ using System.Net;
 using VoicePingRequest = voice.Grpc.PingRequest;
 using VoicePongResponse = voice.Grpc.PongResponse;
 using PingVoiceResponse = gateway.Features.Voice.Ping.PingVoiceResponse;
+using gateway.Tests.Api;
+using gateway.Tests.Helpers;
 
 namespace gateway.Tests.Tests
 {
@@ -14,7 +16,7 @@ namespace gateway.Tests.Tests
     [Collection("Gateway")]
     public class Voice
     {
-        private readonly ApiClient _client;
+        private readonly VoiceApi _voiceClient;
         private readonly GatewayFixture _fixture;
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace gateway.Tests.Tests
         {
             _fixture = fixture;
             _fixture.Reset();
-            _client = new ApiClient(fixture.CreateClient());
+            _voiceClient = new VoiceApi(fixture.CreateApiClient());
         }
 
         [Fact]
@@ -39,8 +41,8 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Ok(new VoicePongResponse { Message = "pong" }));
 
             // Act
-            var response = await _client.PingVoice();
-            var body = await _client.ReadAsAsync<PingVoiceResponse>(response);
+            var response = await _voiceClient.Ping();
+            var body = await JsonResponseReader.ReadAsAsync<PingVoiceResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -59,8 +61,8 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Ok(new VoicePongResponse { Message = "custom pong" }));
 
             // Act
-            var response = await _client.PingVoice("hello");
-            var body = await _client.ReadAsAsync<PingVoiceResponse>(response);
+            var response = await _voiceClient.Ping("hello");
+            var body = await JsonResponseReader.ReadAsAsync<PingVoiceResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");
@@ -76,7 +78,7 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Error<VoicePongResponse>(StatusCode.Unavailable));
 
             // Act
-            var response = await _client.PingVoice();
+            var response = await _voiceClient.Ping();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);

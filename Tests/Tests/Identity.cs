@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using gateway.Tests.Api;
+using gateway.Tests.Helpers;
 using Grpc.Core;
 using Moq;
 using System.Net;
@@ -14,7 +16,7 @@ namespace gateway.Tests.Tests
     [Collection("Gateway")]
     public class Identity
     {
-        private readonly ApiClient _client;
+        private readonly IdentityApi _identityClient;
         private readonly GatewayFixture _fixture;
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace gateway.Tests.Tests
         {
             _fixture = fixture;
             _fixture.Reset();
-            _client = new ApiClient(fixture.CreateClient());
+            _identityClient = new IdentityApi(fixture.CreateApiClient());
         }
 
         [Fact]
@@ -39,8 +41,8 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Ok(new IdentityPongResponse { Message = "Pong" }));
 
             // Act
-            var response = await _client.PingIdentity();
-            var body = await _client.ReadAsAsync<PingIdentityResponse>(response);
+            var response = await _identityClient.Ping();
+            var body = await JsonResponseReader.ReadAsAsync<PingIdentityResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -59,8 +61,8 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Ok(new IdentityPongResponse { Message = "custom pong" }));
 
             // Act
-            var response = await _client.PingIdentity("hello");
-            var body = await _client.ReadAsAsync<PingIdentityResponse>(response);
+            var response = await _identityClient.Ping("hello");
+            var body = await JsonResponseReader.ReadAsAsync<PingIdentityResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");
@@ -76,7 +78,7 @@ namespace gateway.Tests.Tests
                 .Returns(GrpcCall.Error<IdentityPongResponse>(StatusCode.Unavailable));
 
             // Act
-            var response = await _client.PingIdentity();
+            var response = await _identityClient.Ping();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
