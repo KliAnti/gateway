@@ -1,24 +1,53 @@
+using gateway.Clients;
+using gateway.Features.Identity.Ping;
+using gateway.Features.Voice.Ping;
+using gateway.Infrastructure.Endpoints;
 using Serilog;
 using Serilog.Enrichers.Span;
-using gateway.Services;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Reflection;
+using IdentityClient = identity.Grpc.Identity.IdentityClient;
+using VoiceClient = voice.Grpc.Voice.VoiceClient;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var http2SupportSwitch = builder.Configuration["Http2UnencryptedSupportSwitch"];
+
+if(!string.IsNullOrWhiteSpace(http2SupportSwitch))
+    AppContext.SetSwitch(http2SupportSwitch, true);
 
 builder.Host.UseSerilog((_, loggerConfiguration) =>
     loggerConfiguration
         .Enrich.FromLogContext()
         .Enrich.WithSpan()
-        .WriteTo.Console(
-            outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] [{TraceId}] {Message:lj}{NewLine}{Exception}"));
+        .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] [{TraceId}] {Message:lj}{NewLine}{Exception}"));
 
-builder.Services.AddGrpc(options => options.Interceptors.Add<TraceIdInterceptor>());
+builder.Services.AddGrpcClient<IdentityClient>(options =>
+{
+    var address = builder.Configuration["Grpc:IdentityAddress"]
+        ?? throw new InvalidOperationException("Missing required configuration: 'Grpc:IdentityAddress'.");
+    options.Address = new Uri(address);
+});
 
-builder.Services.AddGrpcHealthChecks();
-builder.Services.AddHealthChecks().AddCheck("gateway", () => HealthCheckResult.Healthy());
+builder.Services.AddGrpcClient<VoiceClient>(options =>
+{
+    var address = builder.Configuration["Grpc:VoiceAddress"]
+        ?? throw new InvalidOperationException("Missing required configuration: 'Grpc:VoiceAddress'.");
+    options.Address = new Uri(address);
+});
+
+builder.Services.AddScoped<IdentityGrpcClient>();
+builder.Services.AddScoped<VoiceGrpcClient>();
+
+builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
+
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-app.MapGrpcHealthChecksService();
+app.UseSerilogRequestLogging();
+
+app.MapHealthChecks("/health");
+
+app.MapEndpoints();
 
 app.Run();
