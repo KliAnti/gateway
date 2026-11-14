@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using TestFramework.DependencyInjection;
+using TestFramework.Fixtures;
 using IdentityClient = identity.Grpc.Identity.IdentityClient;
 using VoiceClient = voice.Grpc.Voice.VoiceClient;
 
@@ -14,43 +12,19 @@ namespace gateway.Tests
     /// Подмена настоящих микросервисов (клиентов) на их моки.
     /// Фикстура создается единажды на все Gateway тесты.
     /// </summary>
-    public class GatewayFixture : WebApplicationFactory<Program>
+    public class GatewayFixture : MockFixtureBase<Program>
     {
-        public Mock<IdentityClient> IdentityClient { get; } = new();
-        public Mock<VoiceClient> VoiceClient { get; } = new();
+        public Mock<IdentityClient> IdentityClient { get; private set; } = null!;
+        public Mock<VoiceClient> VoiceClient { get; private set; } = null!;
 
         /// <summary>
         /// Подменяет в DI настоящие клиенты на моки перед запуском тестового хоста.
         /// </summary>
-        /// <param name="builder">Конфигурация хоста, которую собирает WebApplicationFactory.</param>
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        /// <param name="services">Коллекция сервисов тестового хоста.</param>
+        protected override void ConfigureMocks(IServiceCollection services)
         {
-            builder.ConfigureTestServices(services =>
-            {
-                services.RemoveAll<IdentityClient>();
-                services.AddSingleton(IdentityClient.Object);
-
-                services.RemoveAll<VoiceClient>();
-                services.AddSingleton(VoiceClient.Object);
-            });
-        }
-
-        /// <summary>
-        /// Сбрасывает настройки и историю вызовов обоих моков.
-        /// Под каждый тест своя настройка.
-        /// </summary>
-        public void Reset()
-        {
-            IdentityClient.Reset();
-            VoiceClient.Reset();
-        }
-
-        /// <summary>
-        /// Собирает ApiClient поверх HttpClient этой фикстуры.
-        /// </summary>
-        public ApiClient CreateApiClient()
-        {
-            return new ApiClient(CreateClient());
+            IdentityClient = services.RegisterMock<IdentityClient>(MockRegistry);
+            VoiceClient = services.RegisterMock<VoiceClient>(MockRegistry);
         }
     }
 

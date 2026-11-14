@@ -1,12 +1,13 @@
 ﻿using FluentAssertions;
+using gateway.Tests.Api;
 using Grpc.Core;
 using Moq;
 using System.Net;
+using TestFramework.Grpc;
+using TestFramework.Http;
 using VoicePingRequest = voice.Grpc.PingRequest;
 using VoicePongResponse = voice.Grpc.PongResponse;
 using PingVoiceResponse = gateway.Features.Voice.Ping.PingVoiceResponse;
-using gateway.Tests.Api;
-using gateway.Tests.Helpers;
 
 namespace gateway.Tests.Tests
 {
@@ -42,7 +43,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _voiceClient.Ping();
-            var body = await JsonResponseReader.ReadAsAsync<PingVoiceResponse>(response);
+            var body = await JsonResponseReader.ReadAsync<PingVoiceResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -62,7 +63,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _voiceClient.Ping("hello");
-            var body = await JsonResponseReader.ReadAsAsync<PingVoiceResponse>(response);
+            var body = await JsonResponseReader.ReadAsync<PingVoiceResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");
@@ -75,7 +76,7 @@ namespace gateway.Tests.Tests
             // Arrange
             _fixture.VoiceClient
                 .Setup(c => c.PingAsync(It.IsAny<VoicePingRequest>(), It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
-                .Returns(GrpcCall.Error<VoicePongResponse>(StatusCode.Unavailable));
+                .Returns(GrpcCall.Error<VoicePongResponse>(new Status(StatusCode.Unavailable, StatusCode.Unavailable.ToString())));
 
             // Act
             var response = await _voiceClient.Ping();
