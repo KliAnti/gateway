@@ -1,9 +1,10 @@
 ﻿using FluentAssertions;
 using gateway.Tests.Api;
-using gateway.Tests.Helpers;
 using Grpc.Core;
 using Moq;
 using System.Net;
+using TestFramework.Grpc;
+using TestFramework.Http;
 using IdentityPingRequest = identity.Grpc.PingRequest;
 using IdentityPongResponse = identity.Grpc.PongResponse;
 using PingIdentityResponse = gateway.Features.Identity.Ping.PingIdentityResponse;
@@ -42,7 +43,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _identityClient.Ping();
-            var body = await JsonResponseReader.ReadAsAsync<PingIdentityResponse>(response);
+            var body = await JsonResponseReader.ReadAsync<PingIdentityResponse>(response);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -62,7 +63,7 @@ namespace gateway.Tests.Tests
 
             // Act
             var response = await _identityClient.Ping("hello");
-            var body = await JsonResponseReader.ReadAsAsync<PingIdentityResponse>(response);
+            var body = await JsonResponseReader.ReadAsync<PingIdentityResponse>(response);
 
             // Assert
             body!.Message.Should().Be("custom pong");
@@ -75,7 +76,7 @@ namespace gateway.Tests.Tests
             // Arrange
             _fixture.IdentityClient
                 .Setup(c => c.PingAsync(It.IsAny<IdentityPingRequest>(), It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
-                .Returns(GrpcCall.Error<IdentityPongResponse>(StatusCode.Unavailable));
+                .Returns(GrpcCall.Error<IdentityPongResponse>(new Status(StatusCode.Unavailable, StatusCode.Unavailable.ToString())));
 
             // Act
             var response = await _identityClient.Ping();

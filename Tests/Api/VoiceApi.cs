@@ -1,4 +1,4 @@
-﻿using gateway.Tests.Helpers;
+﻿using TestFramework.Http;
 using gateway.Tests.Routes;
 
 namespace gateway.Tests.Api
@@ -25,7 +25,11 @@ namespace gateway.Tests.Api
         /// <param name="message">Текст, отправляемый в voice.</param>
         public Task<HttpResponseMessage> Ping(string? message = null)
         {
-            return _client.GetAsync(UrlBuilder.WithQueryParam(VoiceRoutes.Ping, "message", message));
+            var url = UrlBuilder.Build(VoiceRoutes.Ping, new Dictionary<string, object?>
+            {
+                ["message"] = message
+            });
+            return _client.Get(url);
         }
     }
 }
